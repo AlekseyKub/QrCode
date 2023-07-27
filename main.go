@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	var VersionCode int = 10 //Версия кода
+	var VersionCode int = 11 //Версия кода
 	var correctionLevel = 3  //Уровень коррекциих[0-3] 0-L, 1-M, 2-Q, 3-H
 	var codeIndicators = 4   //Индикатор режима
 	var maskNumber = 2       //Номер маски
@@ -21,7 +21,6 @@ func main() {
 
 	//Входные данные
 	var dataIn = []byte("https://drive.google.com")
-	fmt.Println(len(dataIn))
 
 	//Создаю срез для обработки данных
 	var data = make([]byte, 0, qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)
@@ -29,10 +28,10 @@ func main() {
 	//Проверка помещются ли данные в выбранный QR код
 	if qrgen.SizeСheck(dataIn, VersionCode-1, correctionLevel) {
 		data = append(data, byte(codeIndicators))
-		if VersionCode < 10 {
-			data = append(data, byte(len(dataIn)))
+		if VersionCode < 10 { //если меньше 10 версии
+			data = append(data, byte(len(dataIn))) //поле количество данных 1 байт
 		} else {
-			data = append(data, (howMuchData(len(dataIn)))...)
+			data = append(data, (howMuchData(len(dataIn)))...) //поле количества данных 2 байта
 		}
 		data = append(data, dataIn...)
 		bitShift(data, 4) //сдвигаю данные на 4 бита влево
@@ -40,14 +39,8 @@ func main() {
 		fmt.Println("Увеличить версию QR кода")
 	}
 
-	fmt.Println("data+++++++++")
-	fmt.Println(data)
-	fmt.Println("data+++++++++")
 	//Дополняю данные до нужной длинны байтами 236 17
 	data = fillData(data, VersionCode-1, correctionLevel)
-	fmt.Println("data---------")
-	fmt.Println(data)
-	fmt.Println("data---------")
 
 	//Формирую массив для заполнения QR
 	//(расчет блоков коррекции + заполение данными + блокими коррекции)
@@ -61,20 +54,20 @@ func main() {
 
 	//Нанесение поисковых узоров
 	qrgen.MakeSearchPattern(qrCode)
+
 	//Нанесение выравнивающих узоров
 	qrgen.CreatePattern(qrgen.LevelingPattern[VersionCode-1], qrCode)
+
 	//Нанесение маски и уровня коррекции
 	qrgen.CreateMaskAndCorrectionLevel(qrCode, VersionCode-1, correctionLevel, maskNumber)
 
 	//Заполнение QR кода данными
-	//data6 := []byte{255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0}
 	qrgen.AddingDataQR(qrCode, dataOut, VersionCode-1)
 
 	//Применение маски
 	qrgen.ApplyMask(qrCode, maskNumber)
 
 	//Вывести Qr код
-
 	for i := 0; i < (len(qrCode)); i++ {
 		for x := 0; x < (len(qrCode)); x++ {
 			fmt.Print(qrCode[i][x])
@@ -86,17 +79,6 @@ func main() {
 
 	//создать SVG файл
 	qrgen.CreateSvg(qrCode)
-}
-
-func printBit(x int) {
-	for i := 7; i >= 0; i-- {
-		if hasBit(x, i) {
-			fmt.Print(1)
-		} else {
-			fmt.Print(0)
-		}
-	}
-	fmt.Print(" ")
 }
 
 // Проверить бит (если 1 вертнет TRUE)
@@ -133,15 +115,11 @@ func fillData(data []byte, ver int, cor int) []byte {
 	return data
 }
 
+// раделение на 2 байта количсво данных (для версии > 10)
 func howMuchData(num int) []byte {
 	quantity := []byte{0, 0}
-	fmt.Println(quantity)
-	fmt.Println("Quantity")
-
 	quantity[0] = byte(num >> 8)
-	fmt.Println(quantity[0])
 	quantity[1] = byte(num)
-	fmt.Println(quantity[1])
 
 	return quantity
 }
