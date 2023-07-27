@@ -9,10 +9,10 @@ import (
 
 func main() {
 
-	var VersionCode int = 3 //Версия кода
-	var correctionLevel = 1 //Уровень коррекциих[0-3] 0-L, 1-M, 2-Q, 3-H
-	var codeIndicators = 4  //Индикатор режима
-	var maskNumber = 0      //Номер маски
+	var VersionCode int = 10 //Версия кода
+	var correctionLevel = 3  //Уровень коррекциих[0-3] 0-L, 1-M, 2-Q, 3-H
+	var codeIndicators = 4   //Индикатор режима
+	var maskNumber = 2       //Номер маски
 
 	//срез для данных окончательного заполнения QR кода
 	var dataOut = make([]byte, 0, (qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)+
@@ -20,22 +20,34 @@ func main() {
 			qrgen.NumberOfBytesCorrection[VersionCode-1][correctionLevel]))
 
 	//Входные данные
-	var dataIn = []byte("https://google.com")
+	var dataIn = []byte("https://drive.google.com")
+	fmt.Println(len(dataIn))
+
 	//Создаю срез для обработки данных
 	var data = make([]byte, 0, qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)
 
 	//Проверка помещются ли данные в выбранный QR код
 	if qrgen.SizeСheck(dataIn, VersionCode-1, correctionLevel) {
 		data = append(data, byte(codeIndicators))
-		data = append(data, byte(len(dataIn)))
+		if VersionCode < 10 {
+			data = append(data, byte(len(dataIn)))
+		} else {
+			data = append(data, (howMuchData(len(dataIn)))...)
+		}
 		data = append(data, dataIn...)
 		bitShift(data, 4) //сдвигаю данные на 4 бита влево
 	} else {
-		fmt.Println("Увеличить версию")
+		fmt.Println("Увеличить версию QR кода")
 	}
 
+	fmt.Println("data+++++++++")
+	fmt.Println(data)
+	fmt.Println("data+++++++++")
 	//Дополняю данные до нужной длинны байтами 236 17
 	data = fillData(data, VersionCode-1, correctionLevel)
+	fmt.Println("data---------")
+	fmt.Println(data)
+	fmt.Println("data---------")
 
 	//Формирую массив для заполнения QR
 	//(расчет блоков коррекции + заполение данными + блокими коррекции)
@@ -52,23 +64,25 @@ func main() {
 	//Нанесение выравнивающих узоров
 	qrgen.CreatePattern(qrgen.LevelingPattern[VersionCode-1], qrCode)
 	//Нанесение маски и уровня коррекции
-	qrgen.CreateMaskAndCorrectionLevel(qrCode, VersionCode, correctionLevel, maskNumber)
+	qrgen.CreateMaskAndCorrectionLevel(qrCode, VersionCode-1, correctionLevel, maskNumber)
 
 	//Заполнение QR кода данными
+	//data6 := []byte{255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0}
 	qrgen.AddingDataQR(qrCode, dataOut, VersionCode-1)
+
 	//Применение маски
 	qrgen.ApplyMask(qrCode, maskNumber)
 
 	//Вывести Qr код
 
-	// for i := 0; i < (len(qrCode)); i++ {
-	// 	for x := 0; x < (len(qrCode)); x++ {
-	// 		fmt.Print(qrCode[i][x])
-	// 		if x == (len(qrCode))-1 {
-	// 			fmt.Println()
-	// 		}
-	// 	}
-	// }
+	for i := 0; i < (len(qrCode)); i++ {
+		for x := 0; x < (len(qrCode)); x++ {
+			fmt.Print(qrCode[i][x])
+			if x == (len(qrCode))-1 {
+				fmt.Println()
+			}
+		}
+	}
 
 	//создать SVG файл
 	qrgen.CreateSvg(qrCode)
@@ -117,4 +131,17 @@ func fillData(data []byte, ver int, cor int) []byte {
 		}
 	}
 	return data
+}
+
+func howMuchData(num int) []byte {
+	quantity := []byte{0, 0}
+	fmt.Println(quantity)
+	fmt.Println("Quantity")
+
+	quantity[0] = byte(num >> 8)
+	fmt.Println(quantity[0])
+	quantity[1] = byte(num)
+	fmt.Println(quantity[1])
+
+	return quantity
 }
