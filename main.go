@@ -16,11 +16,6 @@ var fileName string = ""    //Название файла
 
 func main() {
 
-	// //срез для данных окончательного заполнения QR кода
-	// var dataOut = make([]byte, 0, (qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)+
-	// 	(qrgen.NumberOfBlocks[VersionCode-1][correctionLevel]*
-	// 		qrgen.NumberOfBytesCorrection[VersionCode-1][correctionLevel]))
-
 	//Входные данные
 	var dataIn = []byte("")
 
@@ -43,6 +38,7 @@ func main() {
 
 	//Определение необходимой версии
 	VersionCode = qrgen.CalculatVersion(len(dataIn), correctionLevel)
+	fmt.Println(VersionCode)
 
 	//срез для данных окончательного заполнения QR кода
 	var dataOut = make([]byte, 0, (qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)+
@@ -83,7 +79,12 @@ func main() {
 	qrgen.MakeSearchPattern(qrCode)
 
 	//Нанесение выравнивающих узоров
-	qrgen.CreatePattern(qrgen.LevelingPattern[VersionCode-1], qrCode)
+	if VersionCode > 1 {
+		qrgen.CreatePattern(qrgen.LevelingPattern[VersionCode-1], qrCode)
+	}
+
+	//Нанесение шаблона синхронизации (верт. и гор. зонатьной послендовательности 1 и 0)
+	qrgen.СreateTimingTemplate(qrCode)
 
 	//Нанесение маски и уровня коррекции
 	qrgen.CreateMaskAndCorrectionLevel(qrCode, VersionCode-1, correctionLevel, maskNumber)
