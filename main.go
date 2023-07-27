@@ -3,24 +3,51 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/AlekseyKub/qrgen"
 )
 
+var VersionCode int = 0     //Версия кода
+var correctionLevel int = 0 //Уровень коррекциих[0-3] 0-L, 1-M, 2-Q, 3-H
+var codeIndicators int = 4  //Индикатор режима
+var maskNumber int = 0      //Номер маски
+var fileName string = ""    //Название файла
+
 func main() {
 
-	var VersionCode int = 11 //Версия кода
-	var correctionLevel = 3  //Уровень коррекциих[0-3] 0-L, 1-M, 2-Q, 3-H
-	var codeIndicators = 4   //Индикатор режима
-	var maskNumber = 2       //Номер маски
+	// //срез для данных окончательного заполнения QR кода
+	// var dataOut = make([]byte, 0, (qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)+
+	// 	(qrgen.NumberOfBlocks[VersionCode-1][correctionLevel]*
+	// 		qrgen.NumberOfBytesCorrection[VersionCode-1][correctionLevel]))
+
+	//Входные данные
+	var dataIn = []byte("")
+
+	//argsWithoutProg := os.Args[1:]
+	dataIn = make([]byte, 0, len(os.Args[1]))
+	dataIn = append(dataIn, os.Args[1]...)
+	fileName = os.Args[2]
+
+	arg3 := os.Args[3]
+	switch arg3 {
+	case "l":
+		correctionLevel = 0
+	case "m":
+		correctionLevel = 1
+	case "q":
+		correctionLevel = 2
+	case "h":
+		correctionLevel = 3
+	}
+
+	//Определение необходимой версии
+	VersionCode = qrgen.CalculatVersion(len(dataIn), correctionLevel)
 
 	//срез для данных окончательного заполнения QR кода
 	var dataOut = make([]byte, 0, (qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)+
 		(qrgen.NumberOfBlocks[VersionCode-1][correctionLevel]*
 			qrgen.NumberOfBytesCorrection[VersionCode-1][correctionLevel]))
-
-	//Входные данные
-	var dataIn = []byte("https://drive.google.com")
 
 	//Создаю срез для обработки данных
 	var data = make([]byte, 0, qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)
@@ -67,18 +94,18 @@ func main() {
 	//Применение маски
 	qrgen.ApplyMask(qrCode, maskNumber)
 
-	//Вывести Qr код
-	for i := 0; i < (len(qrCode)); i++ {
-		for x := 0; x < (len(qrCode)); x++ {
-			fmt.Print(qrCode[i][x])
-			if x == (len(qrCode))-1 {
-				fmt.Println()
-			}
-		}
-	}
+	// //Вывести Qr код
+	// for i := 0; i < (len(qrCode)); i++ {
+	// 	for x := 0; x < (len(qrCode)); x++ {
+	// 		fmt.Print(qrCode[i][x])
+	// 		if x == (len(qrCode))-1 {
+	// 			fmt.Println()
+	// 		}
+	// 	}
+	// }
 
 	//создать SVG файл
-	qrgen.CreateSvg(qrCode)
+	qrgen.CreateSvg(qrCode, fileName)
 }
 
 // Проверить бит (если 1 вертнет TRUE)
@@ -98,7 +125,7 @@ func bitShift(arr []byte, x int) {
 	}
 }
 
-// Дополнить данный до нужной длинны
+// Дополнить данные до нужной длинны
 func fillData(data []byte, ver int, cor int) []byte {
 	a := 236 //11101100
 	b := 17  //00010001
