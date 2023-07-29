@@ -95,15 +95,17 @@ func main() {
 	//Применение маски
 	qrgen.ApplyMask(qrCode, maskNumber)
 
-	// //Вывести Qr код
-	// for i := 0; i < (len(qrCode)); i++ {
-	// 	for x := 0; x < (len(qrCode)); x++ {
-	// 		fmt.Print(qrCode[i][x])
-	// 		if x == (len(qrCode))-1 {
-	// 			fmt.Println()
-	// 		}
-	// 	}
-	// }
+	//Вывести Qr код
+	for i := 0; i < (len(qrCode)); i++ {
+		for x := 0; x < (len(qrCode)); x++ {
+			fmt.Print(qrCode[i][x])
+			if x == (len(qrCode))-1 {
+				fmt.Println()
+			}
+		}
+	}
+
+	qrgen.MaskSelection(qrCode)
 
 	//создать SVG файл
 	qrgen.CreateSvg(qrCode, fileName)
