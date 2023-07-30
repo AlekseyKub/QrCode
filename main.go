@@ -13,6 +13,7 @@ var correctionLevel int = 0 //Уровень коррекциих[0-3] 0-L, 1-M,
 var codeIndicators int = 4  //Индикатор режима
 var maskNumber int = 0      //Номер маски
 var fileName string = ""    //Название файла
+var style string = ""       //Стиль QR кода circle или rect
 
 func main() {
 
@@ -36,9 +37,10 @@ func main() {
 		correctionLevel = 3
 	}
 
+	style = os.Args[4]
+
 	//Определение необходимой версии
 	VersionCode = qrgen.CalculatVersion(len(dataIn), correctionLevel)
-	fmt.Println(VersionCode)
 
 	//срез для данных окончательного заполнения QR кода
 	var dataOut = make([]byte, 0, (qrgen.MaxDataBit[VersionCode-1][correctionLevel]/8)+
@@ -95,20 +97,12 @@ func main() {
 	//Применение маски
 	qrgen.ApplyMask(qrCode, maskNumber)
 
-	//Вывести Qr код
-	for i := 0; i < (len(qrCode)); i++ {
-		for x := 0; x < (len(qrCode)); x++ {
-			fmt.Print(qrCode[i][x])
-			if x == (len(qrCode))-1 {
-				fmt.Println()
-			}
-		}
-	}
-
-	qrgen.MaskSelection(qrCode)
-
 	//создать SVG файл
-	qrgen.CreateSvg(qrCode, fileName)
+	if style == "circle" {
+		qrgen.CreateSvgCircle(qrCode, fileName)
+	} else {
+		qrgen.CreateSvgRect(qrCode, fileName)
+	}
 }
 
 // Проверить бит (если 1 вертнет TRUE)
